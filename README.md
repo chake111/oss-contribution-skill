@@ -9,19 +9,43 @@
 
 ## 安装
 
+装到当前 Agent 的 skills 目录。目录名必须是 `oss-contribution`，与 `SKILL.md` 的 `name` 字段一致，否则不会加载。
+
+WorkBuddy：
+
 ```bash
-git clone https://github.com/chake111/oss-contribution-skill.git ~/.codex/skills/oss-contribution
+git clone https://github.com/chake111/oss-contribution-skill.git ~/.workbuddy/skills/oss-contribution
 ```
 
-目录名必须是 `oss-contribution`，与 `SKILL.md` 的 `name` 字段一致，否则 Agent 不会加载。其他环境换成对应的 skills 目录即可，例如 WorkBuddy 是 `~/.workbuddy/skills/oss-contribution`。
+Codex 换成 `~/.codex/skills/oss-contribution`，其他环境同理。
+
+两个环境都要用，只装一份，另一处建目录联接（Windows junction 或 `ln -s`）。不要复制两份——副本会和仓库分叉，改了一边另一边不知道。升级在安装目录 `git pull`。
 
 装好后直接说需求，不需要记命令：
 
-- `帮我找一个适合首次贡献的 AI Agent 项目`
+- `帮我找一个适合首次贡献的项目`
 - `https://github.com/owner/repo 这个仓库，有什么值得做的`
 - `接着上次的任务卡继续`
 
 想确认有没有装好：让它读一遍 `SKILL.md` 并复述五个阶段，能说对就是加载成功。
+
+## 仓库结构
+
+```text
+oss-contribution/
+├── SKILL.md              入口：阶段路由、自主决策与发布自检
+├── references/           各阶段细则，按需读取
+│   ├── screen.md         项目筛查
+│   ├── research.md       机会调研
+│   ├── design.md         方案设计
+│   ├── implement.md      受控实现
+│   └── pr.md             PR 描述
+├── assets/
+│   ├── task-card.md      贡献任务卡模板
+│   └── readme/hero.svg   首屏图
+├── README.md
+└── LICENSE
+```
 
 ## 输出长什么样
 
@@ -61,6 +85,15 @@ Testing
 pnpm test queue -- --grep "restart"    修复前失败 2 例，修复后通过
 ```
 
+叙事文档片段：
+
+```text
+## 4. 成果（Result）
+- PR 状态：已合并 2026-11-03（pull/2891）
+- 功能影响：cp1252 流输出中文，由抛 UnicodeEncodeError 改为 \u4e2d\u6587 转义，退出码 0
+- 量化指标：pytest 1183 → 1185 passed（新增 2 例），diff +46/−6【作者自述】
+```
+
 ## 它解决什么问题
 
 用 AI 做开源贡献，卡点通常不是写不出代码：
@@ -70,7 +103,7 @@ pnpm test queue -- --grep "restart"    修复前失败 2 例，修复后通过
 - **描述变成负担**：长篇模板套话，反而增加维护者的审阅成本。
 - **上下文丢失**：Issue、Review、CI 来回往往跨越多天，一次会话结束就得从头梳理。
 
-这套流程约束的是节奏：先确认值得做，再确认做什么，最后才动代码。
+这套流程约束的是节奏：先判断值不值得做，再决定做什么，最后才动代码。
 
 ## 五个阶段
 
@@ -102,7 +135,7 @@ pnpm test queue -- --grep "restart"    修复前失败 2 例，修复后通过
 
 选定方向后建一张任务卡（模板见 [assets/task-card.md](assets/task-card.md)）。**卡片放在项目工作树之外**，否则会污染 diff。
 
-卡片记四类信息：基本信息（仓库、Issue/PR、分支）、当前阶段与下一步、关键上下文（设计约束、核心文件、验证命令）、变更与决策记录。
+卡片记四类信息：基本信息（仓库、Issue/PR、分支、`publish` 开关）、当前阶段与下一步、关键上下文（设计约束、核心文件、验证命令）、自主决策记录（决定、依据、放弃的选项）。
 
 每次推进时更新卡片；接续时先读卡，再重新核对可能变化的 Issue 状态、认领情况和代码版本——上次的结论不能直接沿用。
 
@@ -117,6 +150,7 @@ pnpm test queue -- --grep "restart"    修复前失败 2 例，修复后通过
 - 面向**单 PR 规模**的贡献。大型特性、长期维护者角色不在范围内。
 - 默认预算两周内完成实现、测试并提交 PR。时间更紧时应缩小改动范围，而不是压缩验证。
 - 目标仓库需要有可运行的测试或本地环境，否则第四阶段无法闭环。
+- 发布是自动执行的，评论和 PR 直接落到真实账号上。第一次在某个仓库用，建议先在卡片写 `publish: dry-run` 走一遍。
 - 需要 Agent 支持 Agent Skills 格式（`SKILL.md` + `references/` 目录约定）。文档目前只有中文，向英文仓库提交时 PR 正文要按仓库语言重写。
 
 ## 许可证
